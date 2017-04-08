@@ -1,0 +1,295 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <div class="row-fluid">
+        <div class="col-md-5 col-md-offset-1">
+            <h2>Upload files</h2>
+            <form class="form-horizontal" id='upload-file' method="POST" enctype="multipart/form-data">
+                <fieldset>
+                    <div class="form-group has-feedback" id="upload_files_series_name">
+                        <label class="col-sm-4 control-label" for="series_name_field">Series name</label>
+                        <div class="col-sm-7">
+                            {{ import_form.hidden_tag() }}
+                            <input id="series_name_field" name="series_name_field" type="text" class="form-control"
+                                   onkeyup="series_name_keypress()">
+                            <span class="help-block" id="response">Enter unique series name</span>
+                        </div>
+
+                    </div>
+                </fieldset>
+
+                <fieldset>
+                    <div class="form-group">
+                        <label class="col-sm-4 control-label" for="serial_tag_field">Serial tag </label>
+                        <div class="col-sm-7">
+                            <input type="text" id="serial_tag_field" class="form-control" name="serial_tag_field"
+                                   placeholder="ex. A=90, B=100, C=100, HV=850, Hydrogen-3, THM">
+                        </div>
+                        <div class="col-sm-4"></div>
+                    </div>
+                </fieldset>
+                <fieldset>
+                    <div class="col-sm-8">
+                        <h4>Upload files to database</h4>
+                        <div class="input-group col-sm-12">
+                            <label class="input-group-btn">
+                                    <span class="btn btn-primary" id="browsebutton">
+                                        <i class="glyphicon glyphicon-search"></i> Browse
+                                        <input name="files" type="file" accept=".tdc" data-max-size="2048" multiple
+                                               style="display: none;"
+                                               id="my-file-selector">
+                                    </span>
+                            </label>
+                            <input type="text" class="form-control col-sm-9" readonly>
+                        </div>
+                        <span class="help-block">Select one or more files with .tdc extension</span>
+                        {#                            <button class="btn btn-warning" id="view_data">View data</button>#}
+                        <button class="btn btn-danger" id="upload-file-btn" type="button" disabled>
+                            <i class="glyphicon glyphicon-upload"></i> Upload
+                        </button>
+
+                    </div>
+                </fieldset>
+            </form>
+            <div class="col-sm-12" id="success-alert" style="margin-top: 25px">
+                {% if session_committed %}
+                    <div class="row">
+                        <div class="alert alert-success">
+                            <strong>Success!</strong> Session committed successfully!
+                        </div>
+                    </div>
+                {% endif %}
+                {% if commit_canceled %}
+                    <div class="row">
+                        <div class="alert alert-warning">
+                            <strong>Warning!</strong> Commit canceled!
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="col-md-5">
+            <h2>Export table</h2>
+            <form action="export" , method="post" id="export_form" class="form-horizontal">
+                <div class="form-group">
+                    <label class="col-sm-5 control-label" for="series_name"> Series name</label>
+                    <div class="col-sm-7">
+                        {{ export_form.series_name(id="series_name",
+                        placeholder="Series name", list="series_name_vals", class_="form-control col-sm-7") }}
+                        <datalist id="series_name_vals">
+                            {% for choice in export_form.series_choices %}
+                                <option value="{{ choice }}">
+                            {% endfor %}
+                        </datalist>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-5 control-label" for="radionulides">Radionuclide</label>
+                    <div class="col-sm-7">
+                        {{ export_form.radionuclide(choices=export_form.radionuclides, class_="form-control col-sm-12") }}
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-5 control-label" for="coinc_window_n">
+                        Coincidence window N [ns]</label>
+                    <div class="col-sm-7">
+                        {{ export_form.coinc_window_n(class="form-control") }}
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-5 control-label" for="coinc_window_m">
+                        Coincidence window M [ns]</label>
+                    <div class="col-sm-7">
+                        {{ export_form.coinc_window_m(class="form-control") }}
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-5 control-label" for="ext_dt_1">
+                        Extended Dead Time 1 [us]</label>
+                    <div class="col-sm-7">
+                        {{ export_form.ext_dt1(class="form-control") }}
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-5 control-label" for="ext_dt_2">
+                        Extended Dead Time 2 [us]</label>
+                    <div class="col-sm-7">
+                        {{ export_form.ext_dt2(class="form-control") }}
+                    </div>
+                </div>
+                Number of rows: <span id=number_results style="display: inline-block; width: 70px"> </span>
+                <button class="btn btn-primary" type="submit" id="export_button">
+                    <i class="glyphicon glyphicon-download"></i> Export
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <div id="myModal" class="modal fade" role="dialog">
+        <div class="modal-dialog modal-xl">
+
+            <!-- Modal content-->
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <h4 class="modal-title">Database entries</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="col-sm-12" id="upload-table">
+
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <form class="form-inline" action="/commit-session" method="get">
+                        <button type="button" class="btn btn-danger" data-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary" disabled id="commit-btn">Commit</button>
+                    </form>
+                    <div class="checkbox">
+                        <label><input id="checkbox" class="checkbox" type="checkbox" onchange="checkbox()">I confirm
+                                                                                                           that
+                                                                                                           everything
+                                                                                                           is
+                                                                                                           OK</label>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+    </div>
+{% endblock %}
+
+{% block scripts %}
+    {{ super() }}
+    <script>
+        $SCRIPT_ROOT = {{ request.script_root|tojson|safe }}
+
+            $(function () {
+                $('#upload-file-btn').click(function (e) {
+                    e.preventDefault();
+                    var form_data = new FormData($('#upload-file')[0]);
+                    $.ajax({
+                        type: 'POST',
+                        url: '/uploadajax',
+                        data: form_data,
+                        contentType: false,
+                        cache: false,
+                        processData: false,
+                        async: true,
+                        mimeType: 'multipart/form-data',
+                        success: function (data) {
+                            $('#upload-file-btn').disabled = true;
+                            $('#upload-table').append(JSON.parse(data).template);
+                            $('#myModal').modal('show');
+                        }
+                    });
+                });
+            });
+
+
+        function series_name_keypress() {
+            $.getJSON($SCRIPT_ROOT + '/_series_exists', {
+                series_name: $('input[name="series_name_field"]').val()
+            }, function (data) {
+                var resp = $("#response");
+                var serfield = $("#upload_files_series_name");
+                if (data.response == 0) {
+                    serfield.removeClass("has-error").addClass("has-success");
+                    resp.text('Series name is not used').css("color", "green");
+                    document.getElementById('upload-file-btn').disabled = false;
+
+                } else {
+                    serfield.removeClass("has-success").addClass("has-error");
+                    resp.text('Series name taken!').css("color", "red");
+                    document.getElementById('upload-file-btn').disabled = true;
+                }
+                if ($("#series_name_field").val() == '') {
+                    serfield.removeClass("has-success").removeClass("has-error");
+                    resp.text('Enter unique series name').css("color", "grey");
+                }
+            });
+            return false;
+        }
+
+        var selected_items = {};
+        $("#export_form").bind("load change", function (e) {
+            selected_items["#" + e.target.id] = e.target.value;
+            $.getJSON($SCRIPT_ROOT + '/_export_form_data', {
+                series_name: $("#series_name").val(),
+                radionuclide: $("#radionuclide").val(),
+                coinc_window_n: $("#coinc_window_n").val(),
+                coinc_window_m: $("#coinc_window_m").val(),
+                ext_dt1: $("#ext_dt1").val(),
+                ext_dt2: $("#ext_dt2").val()
+            }, function (data) {
+                var arr = {
+                    "#ext_dt1": data.ext_dt1_vals,
+                    "#ext_dt2": data.ext_dt2_vals,
+                    "#coinc_window_n": data.coinc_window_n_vals,
+                    "#coinc_window_m": data.coinc_window_m_vals,
+                    "#radionuclide": data.radionuclide_vals,
+                    "#series_name": data.series_name_vals
+                };
+                var number_results = data.number_results;
+                var number_results_span = $("#number_results");
+                number_results_span.text(number_results);
+                for (var key in selected_items) {
+                    if (selected_items[key] == '') {
+                        delete selected_items[key]
+                    }
+                }
+                for (var key in arr) {
+                    if (!(key in selected_items)) {
+                        var $el = $(key);
+                        if (key == "#radionuclide") {
+                            $el.find('option:gt(0)').remove();
+                        } else {
+                            $el.find('option:gt(1)').remove();
+                        }
+                        $.each(arr[key], function (key, value) {
+                            $el.append($("<option></option>").attr("value", value).text(value));
+                        });
+                    } else {
+
+                    }
+                }
+
+            });
+            return false;
+        });
+
+        $(document).on('change', '#browsebutton :file', function () {
+            var input = $(this),
+                numFiles = input.get(0).files ? input.get(0).files.length : 1,
+                label = input.val().replace(/\\/g, '/').replace(/.*\//, '');
+            input.trigger('fileselect', [numFiles, label]);
+        });
+
+        $(document).ready(function () {
+            $('#browsebutton').find(':file').on('fileselect', function (event, numFiles, label) {
+                var input = $(this).parents('.input-group').find(':text'),
+                    log = numFiles > 1 ? numFiles + ' files selected' : label;
+
+                if (input.length) {
+                    input.val(log);
+                } else {
+                    if (log) alert(log);
+                }
+            });
+        });
+
+        function checkbox(el) {
+            if (document.getElementById('checkbox').checked) {
+                document.getElementById('commit-btn').disabled = false;
+            } else {
+                document.getElementById('commit-btn').disabled = false;
+            }
+        }
+
+        $('#myModal').on('hidden.bs.modal', function () {
+            window.location.href = "/_clear_pickle"
+        })
+
+    </script>
+{% endblock %}
