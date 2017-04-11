@@ -50,13 +50,21 @@
                 </fieldset>
             </form>
             <div class="col-sm-12" id="success-alert" style="margin-top: 25px">
-                {% if session_committed == True %}
+                {% if session_committed %}
                     <div class="row">
                         <div class="alert alert-success">
                             <strong>Success!</strong> Session committed successfully!
                         </div>
                     </div>
                 {% endif %}
+                {% if session_not_committed %}
+                    <div class="row">
+                        <div class="alert alert-danger">
+                            <strong>Error!</strong> Session not committed!
+                        </div>
+                    </div>
+                {% endif %}
+
                 {% if commit_canceled %}
                     <div class="row">
                         <div class="alert alert-warning">

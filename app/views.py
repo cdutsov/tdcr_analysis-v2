@@ -178,7 +178,7 @@ def commit():
             g.session_commited = True
         return redirect(url_for("index", session_committed=True))
     else:
-        return redirect(url_for("index", session_committed=False))
+        return redirect(url_for("index", session_not_committed=True))
 
 
 @app.route('/_clear_pickle')
