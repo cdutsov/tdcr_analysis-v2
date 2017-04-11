@@ -38,25 +38,25 @@ def get_choices(column):
 
 class ExportForm(FlaskForm):
     series_name = StringField('series_name', id='series_name')
-    radionuclides = get_choices(Measurement.radionuclide)
+    radionuclides = get_choices(Measurement.radionuclide) or []
     radionuclide = SelectField(choices=radionuclides, id="radionuclide")
-    coinc_choices_n = get_choices(Measurement.coinc_window_n)
+    coinc_choices_n = get_choices(Measurement.coinc_window_n) or []
     coinc_window_n = SelectField(choices=coinc_choices_n, id="coinc_window_n")
-    coinc_choices_m = get_choices(Measurement.coinc_window_m)
+    coinc_choices_m = get_choices(Measurement.coinc_window_m) or []
     coinc_window_m = SelectField(choices=coinc_choices_m, id="coinc_window_m")
-    ext_dt1_choices = get_choices(Measurement.ext_dt1)
+    ext_dt1_choices = get_choices(Measurement.ext_dt1) or []
     ext_dt1 = SelectField(choices=ext_dt1_choices, id="ext_dt1")
-    ext_dt2_choices = get_choices(Measurement.ext_dt2)
+    ext_dt2_choices = get_choices(Measurement.ext_dt2) or []
     ext_dt2 = SelectField(choices=ext_dt2_choices, id="ext_dt2")
 
     @classmethod
     def new(cls, user):
         form = cls()
-        form.radionuclides = get_choices(Measurement.radionuclide)
-        form.coinc_choices_n = get_choices(Measurement.coinc_window_n)
-        form.coinc_choices_m = get_choices(Measurement.coinc_window_m)
-        form.ext_dt1_choices = get_choices(Measurement.ext_dt1)
-        form.ext_dt2_choices = get_choices(Measurement.ext_dt2)
+        form.radionuclides = get_choices(Measurement.radionuclide) or []
+        form.coinc_choices_n = get_choices(Measurement.coinc_window_n) or []
+        form.coinc_choices_m = get_choices(Measurement.coinc_window_m) or []
+        form.ext_dt1_choices = get_choices(Measurement.ext_dt1) or []
+        form.ext_dt2_choices = get_choices(Measurement.ext_dt2) or []
         form.series_choices = [str(value[0]) for value in db.session.query(Measurement.series_name).join(User).filter(
-            User.username == user).distinct()]
+            User.username == user).distinct()] or []
         return form
