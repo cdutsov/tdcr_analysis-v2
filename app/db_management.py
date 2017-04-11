@@ -37,22 +37,22 @@ def import_files(user_folder, series_name, files, bulk_tag):
         upload_folder = app.config['UPLOAD_FOLDER']
         serial_number = str(uuid.uuid4())
         par_dir = os.path.join(upload_folder, user_folder, date.today().strftime("%B %Y"))
-        dir = series_name
+        udir = series_name
         if not os.path.exists(par_dir):
             os.mkdir(par_dir)
-        if not os.path.exists(os.path.join(par_dir, dir)):
-            os.mkdir(os.path.join(par_dir, dir))
+        if not os.path.exists(os.path.join(par_dir, udir)):
+            os.mkdir(os.path.join(par_dir, udir))
         all_meas = []
         for file in files:
             if file.filename.split('.')[-1] == 'tdc':
                 filename = secure_filename(file.filename)
-                file.save(os.path.join(par_dir, dir, filename))
-                meas = tdc_to_dbmeas(file=open(os.path.join(par_dir, dir, filename)),
+                file.save(os.path.join(par_dir, udir, filename))
+                meas = tdc_to_dbmeas(file=open(os.path.join(par_dir, udir, filename)),
                                      series_name=series_name,
                                      serial_number=serial_number,
                                      bulk_tag=bulk_tag)
                 all_meas.append(meas)
-        pickle.dump(all_meas, file=open(par_dir + "/.tmp_pickle", "wb"))
+        pickle.dump(all_meas, file=open(os.path.join(upload_folder, user_folder) + "/.tmp_pickle", "wb"))
         return all_meas
 
 

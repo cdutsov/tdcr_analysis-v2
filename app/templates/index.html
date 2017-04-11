@@ -57,13 +57,6 @@
                         </div>
                     </div>
                 {% endif %}
-                {% if session_committed == False %}
-                    <div class="row">
-                        <div class="alert alert-warning">
-                            <strong>Error!</strong> Session not committed!
-                        </div>
-                    </div>
-                {% endif %}
                 {% if commit_canceled %}
                     <div class="row">
                         <div class="alert alert-warning">
