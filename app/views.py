@@ -162,7 +162,8 @@ def signout():
 
 @app.route('/commit-session')
 def commit():
-    path = current_user.username + "/data/.tmp_pickle"
+    basedir = os.path.abspath(os.path.dirname(__file__))
+    path = basedir + current_user.username + "/data/.tmp_pickle"
     if os.path.isfile(path=path):
         with open(path, "rb") as f:
             all_meas = pickle.load(f)
@@ -175,7 +176,9 @@ def commit():
             db.session.add(Measurement(**meas))
             db.session.commit()
             g.session_commited = True
-    return redirect(url_for("index", session_committed=True))
+        return redirect(url_for("index", session_committed=True))
+    else:
+        return redirect(url_for("index", session_committed=False))
 
 
 @app.route('/_clear_pickle')
