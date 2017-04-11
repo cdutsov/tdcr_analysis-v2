@@ -162,8 +162,8 @@ def signout():
 
 @app.route('/commit-session')
 def commit():
-    basedir = os.path.abspath(os.path.dirname(__file__))
-    path = basedir + current_user.username + "/.tmp_pickle"
+    upload_folder = app.config['UPLOAD_FOLDER']
+    path = upload_folder + current_user.username + "/.tmp_pickle"
     if os.path.isfile(path=path):
         with open(path, "rb") as f:
             all_meas = pickle.load(f)
