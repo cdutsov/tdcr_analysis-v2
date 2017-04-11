@@ -141,13 +141,6 @@ def before_request():
     g.user = current_user
 
 
-def create_user(username, password):
-    user = User(username=username, password=password)
-    db.session.add(user)
-    db.session.commit()
-    print("user created:", user.username)
-
-
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if g.user is not None and g.user.is_authenticated:
