@@ -85,6 +85,9 @@ class MyFileAdmin(FileAdmin):
             return path
 
 
+if not os.path.exists(app.config['UPLOAD_FOLDER']):
+    os.mkdir(app.config['UPLOAD_FOLDER'])
+
 admin = Admin(app, name='TDCR database', index_view=MyAdminIndexView(),
               base_template='admin-layout.html', template_mode='bootstrap3')
 admin.add_view(MeasView(Measurement, db.session))
