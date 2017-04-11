@@ -104,12 +104,6 @@ def allowed_file(filename):
 @app.route('/', methods=['GET', 'POST'])
 @login_required
 def index():
-    if not os.path.exists(os.path.join(app.config['UPLOAD_FOLDER'], current_user.username)):
-        os.mkdir(os.path.join(app.config['UPLOAD_FOLDER'], current_user.username))
-
-    if not os.path.exists(os.path.join(app.config['UPLOAD_FOLDER'], current_user.username, 'Exports')):
-        os.mkdir(os.path.join(app.config['UPLOAD_FOLDER'], current_user.username, 'Exports'))
-
     form = UploadForm()
     g.user = current_user
     export_form = ExportForm().new(user=current_user.username)
