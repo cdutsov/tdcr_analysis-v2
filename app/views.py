@@ -90,7 +90,7 @@ admin = Admin(app, name='TDCR database', index_view=MyAdminIndexView(),
 admin.add_view(MeasView(Measurement, db.session))
 admin.add_view(AnyView(Cocktail, db.session))
 admin.add_view(UserView(User, db.session))
-admin.add_view(MyFileAdmin(base_path='data/', name='Files'))
+admin.add_view(MyFileAdmin(base_path=app.config['UPLOAD_FOLDER'], name='Files'))
 
 
 def allowed_file(filename):

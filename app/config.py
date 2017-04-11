@@ -1,6 +1,5 @@
 WTF_CSRF_ENABLED = True
 SECRET_KEY = 'n49RtlwUYxYmhqW8OhM6c67nIAlI63Su'
-UPLOAD_FOLDER = 'data/'
 
 import os
 
@@ -12,3 +11,4 @@ else:
 # SQLALCHEMY_DATABASE_URI = 'sqlite:///' + os.path.join(basedir, 'tdcr_database.db')
 SQLALCHEMY_MIGRATE_REPO = os.path.join(basedir, 'tdcr_db_repository')
 SQLALCHEMY_TRACK_MODIFICATIONS = False
+UPLOAD_FOLDER = os.path.join(basedir, 'data/')
