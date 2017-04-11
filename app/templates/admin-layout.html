@@ -23,11 +23,12 @@
                     <li><a href="/admin/measurement">Measurement</a></li>
                     <li><a href="/admin/cocktail">Cocktail</a></li>
                     <li><a href="/admin/myfileadmin">Files</a></li>
+                    {% if current_user.username == 'admin' %}
+                        <li><a href="/admin/user">User</a></li>
+                    {% endif %}
                     <li><a href="/logout">Log out</a></li>
                 {% endif %}
-                {% if current_user.username == 'admin' %}
-                    <li><a href="/admin/user">Log out</a></li>
-                {% endif %}
+
             </ul>
         </div>
     </nav>
