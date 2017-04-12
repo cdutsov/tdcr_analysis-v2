@@ -149,7 +149,7 @@ def extract_bundle(bundle, fields):
 
 
 def add_columns(dicts):
-    rows = {}
+    rows = OrderedDict()
     for d in dicts:
         for k, v in d.items():
             if k:
