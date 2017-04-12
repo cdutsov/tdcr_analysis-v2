@@ -1,0 +1,7 @@
+*.sh
+*.fcgi
+*.pyc
+./flask/*
+./app/data/*
+./app/tdcr_database.db
+./app/tdcr_db_repository/*
