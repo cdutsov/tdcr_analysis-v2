@@ -196,18 +196,17 @@ def session():
     list_of_dicts = []
 
     for result in results:
-        d = OrderedDict({
-            'File name': result["filename"],
-            'Start time': result["datetime"],
-            'Real time': extract_bundle(result["timers_bundle"], fields=["Real_Time"])["Real Time"],
-            'Series name': result["series_name"],
-            'Radionuclide': result["radionuclide"],
-            'LS cocktail': result["cocktail"],
-            'Coincidence window N': result["coinc_window_n"],
-            'Coincidence window M': result["coinc_window_m"],
-            'EXT DT 1': result["ext_dt1"],
-            'EXT DT 2': result["ext_dt2"],
-        })
+        d = OrderedDict(
+            [('File name', result["filename"]),
+             ('Start time', result["datetime"]),
+             ('Real time', extract_bundle(result["timers_bundle"], fields=["Real_Time"])["Real Time"]),
+             ('Series name', result["series_name"]),
+             ('Radionuclide', result["radionuclide"]),
+             ('LS cocktail', result["cocktail"]),
+             ('Coincidence window N', result["coinc_window_n"]),
+             ('Coincidence window M', result["coinc_window_m"]),
+             ('EXT DT 1', result["ext_dt1"]),
+             ('EXT DT 2', result["ext_dt2"])])
         d.update(extract_bundle(result["cps_bundle"], fields=['N1', 'N2', 'M1', 'M2']))
         list_of_dicts.append(d)
     return jsonify({'template': render_template('upload_table.html', table=list_of_dicts)})
