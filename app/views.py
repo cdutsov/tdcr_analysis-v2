@@ -251,11 +251,11 @@ def export():
         d.update(extract_bundle(result.cps_bundle, fields=fields))
         l.append(d)
     rows = add_columns(l)
-    filename = app.config['UPLOAD_FOLDER'] + current_user.username + "/Exports/Export_" \
+    filename = app.config['UPLOAD_FOLDER'] + current_user.username + "/Exports/Export-" \
                + datetime.now().strftime("%a_%d_%b_%Y_%H:%M:%S") + ".csv "
     write_csv(filename=filename, dict=rows)
     response = make_response(open(filename, 'r').read())
-    cd = 'attachment; filename=' + filename
+    cd = 'attachment; filename=' + os.path.basename(filename)
     response.headers['Content-Disposition'] = cd
     response.mimetype = 'text/csv'
     return response
