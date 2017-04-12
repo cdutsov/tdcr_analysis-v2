@@ -208,7 +208,6 @@ def session():
              ('EXT DT 1', result["ext_dt1"]),
              ('EXT DT 2', result["ext_dt2"])])
         d.update(extract_bundle(result["cps_bundle"], fields=['N1', 'N2', 'M1', 'M2']))
-        raise Exception(d)
         list_of_dicts.append(d)
     return jsonify({'template': render_template('upload_table.html', table=list_of_dicts)})
 
