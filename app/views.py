@@ -231,17 +231,17 @@ def export():
              )).filter(User.username == g.user.username).all()
     l = []
     for result in results:
-        d = {'File name': result.filename,
-             'Start time': result.datetime,
-             'Real time': extract_bundle(result.timers_bundle, fields=["Real_Time"])["Real Time"],
-             'Series name': result.series_name,
-             'Radionuclide': result.radionuclide,
-             'LS cocktail': result.cocktail.cocktail_name,
-             'Coincidence window N' if not coinc_window_n == '0' else False: result.coinc_window_n,
-             'Coincidence window M' if not coinc_window_m == '0' else False: result.coinc_window_m,
-             'EXT DT 1' if not ext_dt1 == '0' else False: result.ext_dt1,
-             'EXT DT 2' if not ext_dt2 == '0' else False: result.ext_dt2
-             }
+        d = OrderedDict(
+            [('File name', result.filename),
+             ('Start time', result.datetime),
+             ('Real time', extract_bundle(result.timers_bundle, fields=["Real_Time"])["Real Time"]),
+             ('Series name', result.series_name),
+             ('Radionuclide', result.radionuclide),
+             ('LS cocktail', result.cocktail.cocktail_name),
+             ('Coincidence window N' if not coinc_window_n == '0' else False, result.coinc_window_n),
+             ('Coincidence window M' if not coinc_window_m == '0' else False, result.coinc_window_m),
+             ('EXT DT 1' if not ext_dt1 == '0' else False, result.ext_dt1),
+             ('EXT DT 2' if not ext_dt2 == '0' else False, result.ext_dt2)])
         fields = ['RAW' if show_raw_cps else '',
                   ('N1' if not coinc_window_n == '0' else '') if not ext_dt1 == '0' else '',
                   ('N2' if not coinc_window_n == '0' else '') if not ext_dt2 == '0' else '',
