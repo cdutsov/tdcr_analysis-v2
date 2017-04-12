@@ -47,11 +47,14 @@ def import_files(user_folder, series_name, files, bulk_tag):
             if file.filename.split('.')[-1] == 'tdc':
                 filename = secure_filename(file.filename)
                 file.save(os.path.join(par_dir, udir, filename))
-                meas = tdc_to_dbmeas(file=open(os.path.join(par_dir, udir, filename)),
-                                     series_name=series_name,
-                                     serial_number=serial_number,
-                                     bulk_tag=bulk_tag)
-                all_meas.append(meas)
+                try:
+                    meas = tdc_to_dbmeas(file=open(os.path.join(par_dir, udir, filename)),
+                                         series_name=series_name,
+                                         serial_number=serial_number,
+                                         bulk_tag=bulk_tag)
+                    all_meas.append(meas)
+                except:
+                    print(".tdc file ", filename, ' is corrupted')
         pickle.dump(all_meas, file=open(os.path.join(upload_folder, user_folder) + "/.tmp_pickle", "wb"))
         return all_meas
 
