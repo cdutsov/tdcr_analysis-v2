@@ -19,6 +19,7 @@ from flask import render_template, request, redirect, url_for
 from .db_management import extract_bundle, add_columns, write_csv, import_files, get_or_create
 from .forms import UploadForm, ExportForm, LoginForm
 from .models import Measurement, Cocktail, User
+from collections import OrderedDict
 
 ALLOWED_EXTENSIONS = {'tdc'}
 
@@ -195,7 +196,7 @@ def session():
     list_of_dicts = []
 
     for result in results:
-        d = {
+        d = OrderedDict({
             'File name': result["filename"],
             'Start time': result["datetime"],
             'Real time': extract_bundle(result["timers_bundle"], fields=["Real_Time"])["Real Time"],
@@ -206,7 +207,7 @@ def session():
             'Coincidence window M': result["coinc_window_m"],
             'EXT DT 1': result["ext_dt1"],
             'EXT DT 2': result["ext_dt2"],
-        }
+        })
         d.update(extract_bundle(result["cps_bundle"], fields=['N1', 'N2', 'M1', 'M2']))
         list_of_dicts.append(d)
     return jsonify({'template': render_template('upload_table.html', table=list_of_dicts)})

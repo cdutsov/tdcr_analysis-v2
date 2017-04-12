@@ -3,6 +3,7 @@ import os
 import pickle
 import re
 import uuid
+from collections import OrderedDict
 from datetime import datetime, date
 
 import pandas as pd
@@ -137,7 +138,7 @@ def export_data(**kwargs):
 
 def extract_bundle(bundle, fields):
     data = pickle.loads(bundle)
-    values = {}
+    values = OrderedDict()
     for field in fields:
         if field:
             for key, value in data.items():
