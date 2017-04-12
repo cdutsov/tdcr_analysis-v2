@@ -82,9 +82,9 @@ def tdc_to_dbmeas(file, series_name, bulk_tag, serial_number):
     ext_dt1 = 0
     ext_dt2 = 0
 
-    cps_bundle = dict()
-    counters_bundle = dict()
-    timers_bundle = dict()
+    cps_bundle = OrderedDict()
+    counters_bundle = OrderedDict()
+    timers_bundle = OrderedDict()
     sect = 0
 
     start_time = datetime.strptime(lines[1], '%d-%b-%y ,%H:%M:%S\r\n')
