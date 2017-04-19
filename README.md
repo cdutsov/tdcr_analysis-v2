@@ -2,7 +2,6 @@
 
 1. If using mysql as a database, login as a root like:
 > mysql -u root -p
-then create a database
 > CREATE DATABASE <database-name>;
 > quit;
 
