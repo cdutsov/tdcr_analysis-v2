@@ -28,19 +28,20 @@ class Measurement(db.Model):
     timers_bundle = db.Column(db.PickleType)
 
     def __repr__(self):
-        return '<Measurement %r>' % (self.filename)
+        return '<Measurement %r>' % self.filename
 
 
 class Cocktail(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    cocktail_name = db.Column(db.String, unique=True)
+    cocktail_name = db.Column(db.String(50))
     cocktail_density = db.Column(db.Float)
     cocktail_ratio = db.Column(db.Float)
+    uploader_id = db.Column(db.Integer, db.ForeignKey('user.id'))
 
     cocktail = db.relationship('Measurement', backref='cocktail')
 
     def __repr__(self):
-        return '<Cocktail %r>' % (self.cocktail_name)
+        return '<Cocktail %r>' % self.cocktail_name
 
 
 class User(db.Model):
@@ -48,6 +49,7 @@ class User(db.Model):
     username = db.Column(db.String(64), index=True, unique=True)
     _password = db.Column(db.String(120))
     uploader = db.relationship('Measurement', backref='uploader')
+    cocktail_uploader = db.relationship('Cocktail', backref='cocktail_uploader')
 
     @property
     def is_authenticated(self):

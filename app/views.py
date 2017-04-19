@@ -3,20 +3,17 @@ import pickle
 import re
 from datetime import datetime
 
-from flask_admin import Admin, AdminIndexView
-from flask_admin.contrib.fileadmin import FileAdmin
-from flask_admin.contrib.sqla import ModelView
+
 from flask_login import login_required
 from flask_login import login_user
 from flask_login import logout_user, current_user
-from sqlalchemy import and_
-from sqlalchemy import func
+from sqlalchemy import and_, engine
 
 from app import app, db, login_manager
 from flask import g
 from flask import make_response, jsonify
 from flask import render_template, request, redirect, url_for
-from .db_management import extract_bundle, add_columns, write_csv, import_files, get_or_create
+from .db_management import extract_bundle, add_columns, write_csv, import_files, get_or_create, check_warnings
 from .forms import UploadForm, ExportForm, LoginForm
 from .models import Measurement, Cocktail, User
 from collections import OrderedDict
@@ -24,77 +21,6 @@ from collections import OrderedDict
 ALLOWED_EXTENSIONS = {'tdc'}
 
 
-class MeasView(ModelView):
-    column_exclude_list = ('cps_bundle', 'timers_bundle', 'counters_bundle', 'path', 'serial_number')
-
-    def create_form(self, **kwargs):
-        return self._use_filtered_parent(super(MeasView, self).create_form())
-
-    def get_query(self):
-        return super(MeasView, self).get_query().join(User).filter(User.username == current_user.username)
-
-    def get_count_query(self):
-        """
-            Return a the count query for the model type
-
-            A ``query(self.model).count()`` approach produces an excessive
-            subquery, so ``query(func.count('*'))`` should be used instead.
-
-            See commit ``#45a2723`` for details.
-        """
-        return self.session.query(func.count('*')).select_from(self.model).join(User).filter(
-            User.username == current_user.username)
-
-    def edit_form(self, obj):
-        return self._use_filtered_parent(super(MeasView, self).edit_form(obj))
-
-    def _use_filtered_parent(self, form):
-        form.uploader.query_factory = self._get_parent_list
-        return form
-
-    def _get_parent_list(self):
-        return self.session.query(User).filter_by(username='test-account').all()
-
-    def is_accessible(self):
-        return current_user.is_authenticated
-
-
-class AnyView(ModelView):
-    def is_accessible(self):
-        return current_user.is_authenticated
-
-
-class UserView(ModelView):
-    def is_accessible(self):
-        return current_user.is_authenticated and current_user.username == "admin"
-
-
-class MyAdminIndexView(AdminIndexView):
-    def is_accessible(self):
-        return current_user.is_authenticated
-
-    def inaccessible_callback(self, name, **kwargs):
-        return redirect(url_for('login', next=request.url))
-
-
-class MyFileAdmin(FileAdmin):
-    def get_base_path(self):
-        path = FileAdmin.get_base_path(self)
-        if not current_user.is_anonymous:
-            return os.path.join(path, current_user.username)
-        else:
-            return path
-
-
-if not os.path.exists(app.config['UPLOAD_FOLDER']):
-    os.mkdir(app.config['UPLOAD_FOLDER'])
-
-admin = Admin(app, name='TDCR database', index_view=MyAdminIndexView(),
-              base_template='admin-layout.html', template_mode='bootstrap3')
-admin.add_view(MeasView(Measurement, db.session))
-admin.add_view(AnyView(Cocktail, db.session))
-admin.add_view(UserView(User, db.session))
-admin.add_view(MyFileAdmin(base_path=app.config['UPLOAD_FOLDER'], name='Files'))
 
 
 def allowed_file(filename):
@@ -170,10 +96,12 @@ def commit():
             all_meas = pickle.load(f)
             os.remove(path)
         for meas in all_meas:
-            meas["cocktail"] = \
-                get_or_create(db.session, Cocktail, cocktail_name=re.sub('[^A-Za-z0-9]+', '', meas["cocktail"]))
-            meas["uploader"] = \
-                get_or_create(db.session, User, username=meas["uploader"])
+            uploader = get_or_create(db.session, User, username=meas["uploader"])
+            cocktail_instance = get_or_create(db.session, Cocktail,
+                                              cocktail_name=re.sub('[^A-Za-z0-9]+', '', meas["cocktail"]),
+                                              cocktail_uploader=uploader)
+            meas['cocktail'] = cocktail_instance
+            meas["uploader"] = uploader
             db.session.add(Measurement(**meas))
             db.session.commit()
             g.session_commited = True
@@ -194,6 +122,7 @@ def session():
     bulk_tag = request.form['serial_tag_field']
     results = import_files(user_folder=current_user.username, files=files, series_name=series_name, bulk_tag=bulk_tag)
     list_of_dicts = []
+    warnings = []
 
     for result in results:
         d = OrderedDict(
@@ -208,8 +137,9 @@ def session():
              ('EXT DT 1', result["ext_dt1"]),
              ('EXT DT 2', result["ext_dt2"])])
         d.update(extract_bundle(result["cps_bundle"], fields=['N1', 'N2', 'M1', 'M2']))
+        check_warnings(user=current_user, d=d)
         list_of_dicts.append(d)
-    return jsonify({'template': render_template('upload_table.html', table=list_of_dicts)})
+    return jsonify({'template': render_template('upload_table.html', table=list_of_dicts, warnings=warnings)})
 
 
 @app.route("/export", methods=['GET', 'POST'])
@@ -253,7 +183,7 @@ def export():
     rows = add_columns(l)
     filename = app.config['UPLOAD_FOLDER'] + current_user.username + "/Exports/Export-" \
                + datetime.now().strftime("%a_%d_%b_%Y_%H:%M:%S") + ".csv "
-    write_csv(filename=filename, dict=rows)
+    write_csv(filename=filename, d=rows)
     response = make_response(open(filename, 'r').read())
     cd = 'attachment; filename=' + os.path.basename(filename)
     response.headers['Content-Disposition'] = cd
