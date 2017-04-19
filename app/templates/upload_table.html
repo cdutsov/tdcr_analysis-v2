@@ -16,5 +16,19 @@
             </tr>
         {% endfor %}
         </tbody>
+        {% for key, values in warnings.items() %}
+            {% for value in values %}
+                <div class="row col-sm-8">
+                    <div class="alert alert-warning">
+                        <strong>Warning!</strong>
+                        New {{ key }} with name <strong>{{ value }}</strong> will be added!
+                        {% if key == 'radionuclide' %}
+                        (please use names like Radon-222, Carbon-14 etc.)
+                        {% endif %}
+                    </div>
+                </div>
+            {% endfor %}
+        {% endfor %}
+
     </table>
 </div>

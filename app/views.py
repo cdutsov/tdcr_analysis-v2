@@ -122,7 +122,7 @@ def session():
     bulk_tag = request.form['serial_tag_field']
     results = import_files(user_folder=current_user.username, files=files, series_name=series_name, bulk_tag=bulk_tag)
     list_of_dicts = []
-    warnings = []
+    warnings_list = []
 
     for result in results:
         d = OrderedDict(
@@ -137,8 +137,12 @@ def session():
              ('EXT DT 1', result["ext_dt1"]),
              ('EXT DT 2', result["ext_dt2"])])
         d.update(extract_bundle(result["cps_bundle"], fields=['N1', 'N2', 'M1', 'M2']))
-        check_warnings(user=current_user, d=d)
+        warnings_list.append(check_warnings(user=current_user, d=d))
         list_of_dicts.append(d)
+    warnings = add_columns(warnings_list)
+    for key, values in warnings.items():
+        warnings[key] = set(values)
+    print(warnings)
     return jsonify({'template': render_template('upload_table.html', table=list_of_dicts, warnings=warnings)})
 
 

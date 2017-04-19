@@ -166,12 +166,14 @@ def write_csv(filename, d):
 
 def check_warnings(user, d):
     new_cocktail = d['LS cocktail']
+    new_radionuclide = d['Radionuclide']
     cocktails = db.session.query(Cocktail).join(User).filter(User.username == user.username).distinct()
     cocktail_names = [cocktail.cocktail_name for cocktail in cocktails]
-    print('New cocktail: ', new_cocktail)
-    print('Existing cocktails: ', cocktail_names)
-    if new_cocktail in cocktail_names:
-        print('Cocktail exists!')
-    else:
-        print('New cocktail will be created')
-    return new_cocktail
+    measurements = db.session.query(Measurement).join(User).filter(User.username == user.username).distinct()
+    radionuclides = [measurement.radionuclide for measurement in measurements]
+    warnings = {}
+    if not new_cocktail in cocktail_names:
+        warnings.update({'cocktail': new_cocktail})
+    if not new_radionuclide in radionuclides:
+        warnings.update({'radionuclide': new_radionuclide})
+    return warnings
