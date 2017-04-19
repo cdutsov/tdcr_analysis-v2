@@ -14,7 +14,7 @@ from app import app
 from app import db
 from flask import g
 from flask import redirect, url_for
-from .models import Measurement as dbMeas
+from .models import Measurement, User, Cocktail
 from collections import OrderedDict
 
 
@@ -27,7 +27,8 @@ def get_or_create(session, model, defaults=None, **kwargs):
         params.update(defaults or {})
         instance = model(**params)
         session.add(instance)
-        print("DEBUG: NEW " + str(instance) + " CREATED")
+        session.commit()
+        print("DEBUG: NEW " + str(instance) + " ADDED")
         return instance
 
 
@@ -70,7 +71,7 @@ def tdc_to_dbmeas(file, series_name, bulk_tag, serial_number):
         tag = bulk_tag.rsplit(',')
     if len(tag) > 5:
         radionuclide = tag[4]
-        cocktail = tag[5]
+        cocktail = re.sub('[^A-Za-z0-9]+', '', tag[5])
     else:
         radionuclide = 'N/A'
         cocktail = 'N/A'
@@ -134,7 +135,7 @@ def tdc_to_dbmeas(file, series_name, bulk_tag, serial_number):
 
 
 def export_data(**kwargs):
-    print(db.session.query(dbMeas).filter_by(kwargs).all())
+    print(db.session.query(Measurement).filter_by(kwargs).all())
 
 
 def extract_bundle(bundle, fields):
@@ -157,7 +158,22 @@ def add_columns(dicts):
     return rows
 
 
-def write_csv(filename, dict):
+def write_csv(filename, d):
     with open(filename, 'w') as f:
-        pd.DataFrame(dict, columns=dict.keys()).to_csv(filename, header=True, index=False)
+        pd.DataFrame(d, columns=d.keys()).to_csv(filename, header=True, index=False)
         return f
+
+
+def check_warnings(user, d):
+    new_cocktail = d['LS cocktail']
+    new_radionuclide = d['Radionuclide']
+    cocktails = db.session.query(Cocktail).join(User).filter(User.username == user.username).distinct()
+    cocktail_names = [cocktail.cocktail_name for cocktail in cocktails]
+    measurements = db.session.query(Measurement).join(User).filter(User.username == user.username).distinct()
+    radionuclides = [measurement.radionuclide for measurement in measurements]
+    warnings = {}
+    if not new_cocktail in cocktail_names:
+        warnings.update({'cocktail': new_cocktail})
+    if not new_radionuclide in radionuclides:
+        warnings.update({'radionuclide': new_radionuclide})
+    return warnings
