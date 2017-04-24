@@ -11,7 +11,8 @@ from flask import redirect, url_for, request
 
 
 class MeasView(ModelView):
-    column_exclude_list = ('cps_bundle', 'timers_bundle', 'counters_bundle', 'path', 'serial_number')
+    column_exclude_list = ('cps_bundle', 'timers_bundle', 'counters_bundle', 'path', 'serial_number', 'hardware_bundle',
+                           'comment', 'preset_timer_name')
 
     def create_form(self, **kwargs):
         return self._use_filtered_parent(super(MeasView, self).create_form())

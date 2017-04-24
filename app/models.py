@@ -12,17 +12,27 @@ class Measurement(db.Model):
     filename = db.Column(db.String(50))
     datetime = db.Column(db.DateTime)
     uploader_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    operator = db.Column(db.String(50))
 
     sample_name = db.Column(db.String(50))
     cocktail_id = db.Column(db.Integer, db.ForeignKey('cocktail.id'))
     radionuclide = db.Column(db.String(50))
     comment = db.Column(db.String(200))
+    preset_time = db.Column(db.Integer)
+    stop_timer_name = db.Column(db.String(20))
+    run_number = db.Column(db.String(15))
 
+    threshold_a = db.Column(db.Float)
+    threshold_b = db.Column(db.Float)
+    threshold_c = db.Column(db.Float)
+    high_voltage = db.Column(db.Integer)
     coinc_window_n = db.Column(db.Integer)
     coinc_window_m = db.Column(db.Integer)
     ext_dt1 = db.Column(db.Float)
     ext_dt2 = db.Column(db.Float)
 
+    # Bundles
+    hardware_bundle = db.Column(db.PickleType)
     cps_bundle = db.Column(db.PickleType)
     counters_bundle = db.Column(db.PickleType)
     timers_bundle = db.Column(db.PickleType)

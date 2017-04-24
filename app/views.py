@@ -101,10 +101,10 @@ def commit():
                                               cocktail_name=re.sub('[^A-Za-z0-9]+', '', meas["cocktail"]),
                                               cocktail_uploader=uploader)
             meas['cocktail'] = cocktail_instance
-            meas["uploader"] = uploader
+            meas['uploader'] = uploader
             db.session.add(Measurement(**meas))
             db.session.commit()
-            g.session_commited = True
+            g.session_committed = True
         return redirect(url_for("index", session_committed=True))
     else:
         return redirect(url_for("index", session_not_committed=True))
@@ -123,26 +123,46 @@ def session():
     results = import_files(user_folder=current_user.username, files=files, series_name=series_name, bulk_tag=bulk_tag)
     list_of_dicts = []
     warnings_list = []
+    d = OrderedDict()
 
     for result in results:
-        d = OrderedDict(
-            [('File name', result["filename"]),
-             ('Start time', result["datetime"]),
-             ('Real time', extract_bundle(result["timers_bundle"], fields=["Real_Time"])["Real Time"]),
-             ('Series name', result["series_name"]),
-             ('Radionuclide', result["radionuclide"]),
-             ('LS cocktail', result["cocktail"]),
-             ('Coincidence window N', result["coinc_window_n"]),
-             ('Coincidence window M', result["coinc_window_m"]),
-             ('EXT DT 1', result["ext_dt1"]),
-             ('EXT DT 2', result["ext_dt2"])])
+        try:
+            d = OrderedDict(
+                [('File name', result["filename"]),
+                 ('Start time', result["datetime"]),
+                 # ('Real time', extract_bundle(result["timers_bundle"], fields=["Real_Time"])["Real Time"]),
+                 ('Series name', result["series_name"]),
+                 ('Radionuclide', result["radionuclide"]),
+                 ('LS cocktail', result["cocktail"]),
+                 ('Coincidence window N', result["coinc_window_n"]),
+                 ('Coincidence window M', result["coinc_window_m"]),
+                 ('EXT DT 1', result["ext_dt1"]),
+                 ('EXT DT 2', result["ext_dt2"])])
+        except:
+            print("Old file format error!")
+
+        try:
+            d = OrderedDict(
+                [('File name', result["filename"]),
+                 ('Run number', result["run_number"]),
+                 ('Start time', result["datetime"]),
+                 ('Real time', result["preset_time"]),
+                 ('Series name', result["series_name"]),
+                 ('Radionuclide', result["radionuclide"]),
+                 ('LS cocktail', result["cocktail"]),
+                 ('Coincidence window N', result["coinc_window_n"]),
+                 ('Coincidence window M', result["coinc_window_m"]),
+                 ('EXT DT 1', result["ext_dt1"]),
+                 ('EXT DT 2', result["ext_dt2"])])
+        finally:
+            print('New file format error!')
+
         d.update(extract_bundle(result["cps_bundle"], fields=['N1', 'N2', 'M1', 'M2']))
         warnings_list.append(check_warnings(user=current_user, d=d))
         list_of_dicts.append(d)
     warnings = add_columns(warnings_list)
     for key, values in warnings.items():
         warnings[key] = set(values)
-    print(warnings)
     return jsonify({'template': render_template('upload_table.html', table=list_of_dicts, warnings=warnings)})
 
 
@@ -164,11 +184,12 @@ def export():
              Measurement.ext_dt2 == ext_dt2 if ext_dt2 and not ext_dt2 == '0' else True
              )).filter(User.username == g.user.username).all()
     l = []
+    print(results)
     for result in results:
         d = OrderedDict(
             [('File name', result.filename),
              ('Start time', result.datetime),
-             ('Real time', extract_bundle(result.timers_bundle, fields=["Real_Time"])["Real Time"]),
+             ('Real time', result.preset_time),
              ('Series name', result.series_name),
              ('Radionuclide', result.radionuclide),
              ('LS cocktail', result.cocktail.cocktail_name),
