@@ -4,7 +4,7 @@ import pickle
 import re
 import uuid
 from collections import OrderedDict
-from datetime import datetime, date
+from datetime import datetime, date, timedelta
 
 import pandas as pd
 from sqlalchemy.sql import ClauseElement
@@ -56,8 +56,13 @@ def import_files(user_folder, series_name, files, bulk_tag):
                                          serial_number=serial_number,
                                          bulk_tag=bulk_tag)
                     all_meas.append(meas)
+                    continue
                 except:
                     print(".tdc file ", filename, ' is corrupted')
+                meas = tdc_to_dbmeas_ver34(file=open(os.path.join(par_dir, udir, filename)),
+                                           series_name=series_name,
+                                           serial_number=serial_number)
+                all_meas.extend(meas)
         pickle.dump(all_meas, file=open(os.path.join(upload_folder, user_folder) + "/.tmp_pickle", "wb"))
         return all_meas
 
@@ -132,6 +137,126 @@ def tdc_to_dbmeas(file, series_name, bulk_tag, serial_number):
             "counters_bundle": pickle.dumps(counters_bundle),
             "timers_bundle": pickle.dumps(timers_bundle)
             }
+
+
+def tdc_to_dbmeas_ver34(file, series_name, serial_number):
+    uploader = g.user.username
+    lines = [line for line in file.readlines()]
+    sample_name = ''
+
+    hardware_bundle = OrderedDict()
+    cps_bundle = OrderedDict()
+    counters_bundle = OrderedDict()
+    timers_bundle = OrderedDict()
+
+    measurements = []
+
+    # add hardware data
+    for line in lines[1:3]:
+        key, value = line.rsplit(',', 1)
+        hardware_bundle.update({key: value})
+
+    settings = OrderedDict()
+    for line in lines[6:21]:
+        key, value = [x.strip() for x in line.rsplit(',', 1) if x]
+        settings.update({key: value})
+
+    threshold_a = float(settings['Threshold A [mV]'])
+    threshold_b = float(settings['Threshold B [mV]'])
+    threshold_c = float(settings['Threshold C [mV]'])
+    coinc_window_n = int(settings['Coincidence Window N [ns]'])
+    coinc_window_m = int(settings['Coincidence Window M [ns]'])
+    ext_dt1 = float(settings['Dead Time Extension 1 [us]'])
+    ext_dt2 = float(settings['Dead Time Extension 2 [us]'])
+    preset_time = int(settings['Preset Time per Run [s]'])
+    cocktail = settings['LS Coctail']
+    radionuclide = settings['Nuclides']
+    operator = settings['Operator']
+    comment = settings['Measurement Tag']
+    number_of_runs = settings['Preset Sequential Runs']
+    stop_timer_name = settings['Stop Timer']
+
+    start_time = datetime.now()
+
+    start_line_number = 20
+    run_number = 0
+
+    for line in lines[start_line_number:]:
+        run = line.rsplit(':')
+        if len(run) == 2:
+            if 'START TIME' in run[0]:
+                time = run[1].rsplit(',', 1)
+                stop_timer_name = time[0]
+                start_time = datetime.strptime(time[1], '%d/%b/%y ,%H:%M:%S.%f\r\n')
+            line = run[1].rsplit(',')
+            key, value = line[0], line[1]
+
+            if 'Real Time [s]' in key:
+                run_number = int(''.join(i for i in re.findall(r'\d+', run[0])))
+                if run_number > 1:
+                    measurements.append({"path": file.name,
+                                         "uploader": uploader,
+                                         "serial_number": serial_number,
+                                         "series_name": series_name,
+                                         "filename": os.path.basename(file.name),
+                                         "datetime": start_time,
+                                         "stop_timer_name": stop_timer_name,
+                                         "run_number": str(run_number - 1) + '/' + str(number_of_runs),
+                                         "radionuclide": radionuclide,
+                                         "cocktail": cocktail,
+                                         "sample_name": sample_name,
+                                         "comment": comment,
+                                         "operator": operator,
+                                         "preset_time": preset_time,
+                                         "threshold_a": threshold_a,
+                                         "threshold_b": threshold_b,
+                                         "threshold_c": threshold_c,
+                                         "coinc_window_n": coinc_window_n,
+                                         "coinc_window_m": coinc_window_m,
+                                         "ext_dt1": ext_dt1,
+                                         "ext_dt2": ext_dt2,
+                                         "hardware_bundle": pickle.dumps(hardware_bundle),
+                                         "cps_bundle": pickle.dumps(cps_bundle),
+                                         "counters_bundle": pickle.dumps(counters_bundle),
+                                         "timers_bundle": pickle.dumps(timers_bundle)
+                                         })
+                preset_time = int(re.findall(r'\d+', value)[0])
+                start_time += timedelta(seconds=preset_time * run_number)
+
+            if "[cps]" in key:
+                cps_bundle.update({key: float(value)})
+            elif "[counts]" in key:
+                counters_bundle.update({key: float(value)})
+            elif "[s]" in key:
+                timers_bundle.update({key: float(value)})
+    measurements.append({"path": file.name,
+                         "uploader": uploader,
+                         "serial_number": serial_number,
+                         "series_name": series_name,
+                         "filename": os.path.basename(file.name),
+                         "datetime": start_time,
+                         "stop_timer_name": stop_timer_name,
+                         "run_number": str(run_number) + '/' + str(number_of_runs),
+                         "radionuclide": radionuclide,
+                         "cocktail": cocktail,
+                         "sample_name": sample_name,
+                         "comment": comment,
+                         "operator": operator,
+                         "preset_time": preset_time,
+                         "threshold_a": threshold_a,
+                         "threshold_b": threshold_b,
+                         "threshold_c": threshold_c,
+                         "coinc_window_n": coinc_window_n,
+                         "coinc_window_m": coinc_window_m,
+                         "ext_dt1": ext_dt1,
+                         "ext_dt2": ext_dt2,
+                         "hardware_bundle": pickle.dumps(hardware_bundle),
+                         "cps_bundle": pickle.dumps(cps_bundle),
+                         "counters_bundle": pickle.dumps(counters_bundle),
+                         "timers_bundle": pickle.dumps(timers_bundle)
+                         })
+
+    return measurements
 
 
 def export_data(**kwargs):
