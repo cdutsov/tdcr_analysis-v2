@@ -17,16 +17,16 @@
                     </div>
                 </fieldset>
 
-                <fieldset>
-                    <div class="form-group">
-                        <label class="col-sm-4 control-label" for="serial_tag_field">Serial tag </label>
-                        <div class="col-sm-7">
-                            <input type="text" id="serial_tag_field" class="form-control" name="serial_tag_field"
-                                   placeholder="ex. A=90, B=100, C=100, HV=850, Hydrogen-3, THM">
-                        </div>
-                        <div class="col-sm-4"></div>
-                    </div>
-                </fieldset>
+                {#                <fieldset>#}
+                {#                    <div class="form-group">#}
+                {#                        <label class="col-sm-4 control-label" for="serial_tag_field">Serial tag </label>#}
+                {#                        <div class="col-sm-7">#}
+                {#                            <input type="text" id="serial_tag_field" class="form-control" name="serial_tag_field"#}
+                {#                                   placeholder="ex. A=90, B=100, C=100, HV=850, Hydrogen-3, THM">#}
+                {#                        </div>#}
+                {#                        <div class="col-sm-4"></div>#}
+                {#                    </div>#}
+                {#                </fieldset>#}
                 <fieldset>
                     <div class="col-sm-8">
                         <h4>Upload files to database</h4>
@@ -46,6 +46,8 @@
                         <button class="btn btn-danger" id="upload-file-btn" type="button" disabled>
                             <i class="glyphicon glyphicon-upload"></i> Upload
                         </button>
+                        <span id="upload-help" class="help-block">Series name field is required!</span>
+
                     </div>
                 </fieldset>
             </form>
@@ -124,10 +126,11 @@
                         {{ export_form.ext_dt2(class="form-control") }}
                     </div>
                 </div>
-                Number of rows: <span id=number_results style="display: inline-block; width: 70px"> </span>
                 <button class="btn btn-primary" type="submit" id="export_button">
                     <i class="glyphicon glyphicon-download"></i> Export
                 </button>
+                <span id=number_results class="help-block">Number of entries to be exported: 0</span>
+                {#                <span  style="display: inline-block; width: 70px"> </span>#}
             </form>
         </div>
     </div>
@@ -203,7 +206,6 @@
                     serfield.removeClass("has-error").addClass("has-success");
                     resp.text('Series name is not used').css("color", "green");
                     document.getElementById('upload-file-btn').disabled = false;
-
                 } else {
                     serfield.removeClass("has-success").addClass("has-error");
                     resp.text('Series name taken!').css("color", "red");
@@ -212,57 +214,63 @@
                 if ($("#series_name_field").val() == '') {
                     serfield.removeClass("has-success").removeClass("has-error");
                     resp.text('Enter unique series name').css("color", "grey");
+                    document.getElementById('upload-file-btn').disabled = true;
                 }
             });
             return false;
         }
 
         var selected_items = {};
-        $("#export_form").bind("load change", function (e) {
-            selected_items["#" + e.target.id] = e.target.value;
-            $.getJSON($SCRIPT_ROOT + '/_export_form_data', {
-                series_name: $("#series_name").val(),
-                radionuclide: $("#radionuclide").val(),
-                coinc_window_n: $("#coinc_window_n").val(),
-                coinc_window_m: $("#coinc_window_m").val(),
-                ext_dt1: $("#ext_dt1").val(),
-                ext_dt2: $("#ext_dt2").val()
-            }, function (data) {
-                var arr = {
-                    "#ext_dt1": data.ext_dt1_vals,
-                    "#ext_dt2": data.ext_dt2_vals,
-                    "#coinc_window_n": data.coinc_window_n_vals,
-                    "#coinc_window_m": data.coinc_window_m_vals,
-                    "#radionuclide": data.radionuclide_vals,
-                    "#series_name": data.series_name_vals
-                };
-                var number_results = data.number_results;
-                var number_results_span = $("#number_results");
-                number_results_span.text(number_results);
-                for (var key in selected_items) {
-                    if (selected_items[key] == '') {
-                        delete selected_items[key]
-                    }
-                }
-                for (var key in arr) {
-                    if (!(key in selected_items)) {
-                        var $el = $(key);
-                        if (key == "#radionuclide") {
-                            $el.find('option:gt(0)').remove();
-                        } else {
-                            $el.find('option:gt(1)').remove();
+        var export_form = $('#export_form');
+        $(document).ready(function () {
+            export_form.bind("change", function (e) {
+                selected_items["#" + e.target.id] = e.target.value;
+                $.getJSON($SCRIPT_ROOT + '/_export_form_data', {
+                    series_name: $("#series_name").val(),
+                    radionuclide: $("#radionuclide").val(),
+                    coinc_window_n: $("#coinc_window_n").val(),
+                    coinc_window_m: $("#coinc_window_m").val(),
+                    ext_dt1: $("#ext_dt1").val(),
+                    ext_dt2: $("#ext_dt2").val()
+                }, function (data) {
+                    var arr = {
+                        "#ext_dt1": data.ext_dt1_vals,
+                        "#ext_dt2": data.ext_dt2_vals,
+                        "#coinc_window_n": data.coinc_window_n_vals,
+                        "#coinc_window_m": data.coinc_window_m_vals,
+                        "#radionuclide": data.radionuclide_vals,
+                        "#series_name": data.series_name_vals
+                    };
+                    var number_results = data.number_results;
+                    var number_results_span = $("#number_results");
+                    number_results_span.text("Number of entries to be exported: " + number_results);
+                    for (var key in selected_items) {
+                        if (selected_items[key] == '') {
+                            delete selected_items[key]
                         }
-                        $.each(arr[key], function (key, value) {
-                            $el.append($("<option></option>").attr("value", value).text(value));
-                        });
-                    } else {
-
                     }
-                }
+                    for (var key in arr) {
+                        if (!(key in selected_items)) {
+                            var $el = $(key);
+                            if (key == "#radionuclide") {
+                                $el.find('option:gt(0)').remove();
+                            } else {
+                                $el.find('option:gt(1)').remove();
+                            }
+                            $.each(arr[key], function (key, value) {
+                                $el.append($("<option></option>").attr("value", value).text(value));
+                            });
+                        } else {
 
+                        }
+                    }
+
+                });
+                return false;
             });
-            return false;
+            export_form.trigger('change');
         });
+
 
         $(document).on('change', '#browsebutton :file', function () {
             var input = $(this),

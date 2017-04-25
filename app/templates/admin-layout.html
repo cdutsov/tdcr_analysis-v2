@@ -40,14 +40,15 @@
 
     <div class="container">
         <div class="row">
-            <div class="col-sm-10 col-sm-offset-1">
+            <div class="col-sm-12">
                 <div id="content">
                     {% block brand %}
                         <h2 id="brand">{{ admin_view.name|capitalize }}</h2>
                         <div class="clearfix"></div>
                     {% endblock %}
                     {{ layout.messages() }}
-                    {% block body %}{% endblock %}
+                    {% block body %}
+                    {% endblock %}
                 </div>
             </div>
         </div>

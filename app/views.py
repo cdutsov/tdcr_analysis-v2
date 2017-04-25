@@ -119,8 +119,7 @@ def clear():
 def session():
     files = request.files.getlist("files")
     series_name = request.form['series_name_field']
-    bulk_tag = request.form['serial_tag_field']
-    results = import_files(user_folder=current_user.username, files=files, series_name=series_name, bulk_tag=bulk_tag)
+    results = import_files(user_folder=current_user.username, files=files, series_name=series_name)
     list_of_dicts = []
     warnings_list = []
     d = OrderedDict()
