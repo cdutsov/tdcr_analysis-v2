@@ -28,7 +28,7 @@ def get_choices(column):
     if column == Measurement.radionuclide:
         coinc_choices = [('', 'Any')]
     else:
-        coinc_choices = [('', 'Any'), ('0', 'None')]
+        coinc_choices = [('', 'Any'), ('0', 'Do not show')]
     coinc_choices.extend(
         sorted([(value[0], str(value[0])) for value in
                 db.session.query(column).distinct()],

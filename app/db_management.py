@@ -32,7 +32,7 @@ def get_or_create(session, model, defaults=None, **kwargs):
         return instance
 
 
-def import_files(user_folder, series_name, files, bulk_tag):
+def import_files(user_folder, series_name, files):
     if not series_name:
         print("Please enter series name!")
         return redirect(url_for('index'))
@@ -54,7 +54,7 @@ def import_files(user_folder, series_name, files, bulk_tag):
                     meas = tdc_to_dbmeas(file=open(os.path.join(par_dir, udir, filename)),
                                          series_name=series_name,
                                          serial_number=serial_number,
-                                         bulk_tag=bulk_tag)
+                                         bulk_tag="")
                     all_meas.append(meas)
                     continue
                 except:
@@ -164,6 +164,7 @@ def tdc_to_dbmeas_ver34(file, series_name, serial_number):
     threshold_a = float(settings['Threshold A [mV]'])
     threshold_b = float(settings['Threshold B [mV]'])
     threshold_c = float(settings['Threshold C [mV]'])
+    high_voltage = str(settings['High Voltage'])
     coinc_window_n = int(settings['Coincidence Window N [ns]'])
     coinc_window_m = int(settings['Coincidence Window M [ns]'])
     ext_dt1 = float(settings['Dead Time Extension 1 [us]'])
@@ -211,6 +212,7 @@ def tdc_to_dbmeas_ver34(file, series_name, serial_number):
                                          "threshold_a": threshold_a,
                                          "threshold_b": threshold_b,
                                          "threshold_c": threshold_c,
+                                         "high_voltage": high_voltage,
                                          "coinc_window_n": coinc_window_n,
                                          "coinc_window_m": coinc_window_m,
                                          "ext_dt1": ext_dt1,
@@ -246,6 +248,7 @@ def tdc_to_dbmeas_ver34(file, series_name, serial_number):
                          "threshold_a": threshold_a,
                          "threshold_b": threshold_b,
                          "threshold_c": threshold_c,
+                         "high_voltage": high_voltage,
                          "coinc_window_n": coinc_window_n,
                          "coinc_window_m": coinc_window_m,
                          "ext_dt1": ext_dt1,
