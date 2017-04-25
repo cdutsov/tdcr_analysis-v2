@@ -223,7 +223,7 @@ def tdc_to_dbmeas_ver34(file, series_name, serial_number):
                                          "timers_bundle": pickle.dumps(timers_bundle)
                                          })
                 preset_time = int(re.findall(r'\d+', value)[0])
-                start_time += timedelta(seconds=preset_time * run_number)
+                start_time += timedelta(seconds=preset_time)
 
             if "[cps]" in key:
                 cps_bundle.update({key: float(value)})
