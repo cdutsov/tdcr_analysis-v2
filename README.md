@@ -7,7 +7,9 @@ CREATE DATABASE <database-name>;
 quit;
 ```
 Set DATABASE_URL as environmental variable. DATABASE_URL should have the following format:
-DATABASE_URL=mysql+pymysql://<database-name>:<database-password>2@localhost/<database-name>
+```bash
+DATABASE_URL=mysql+pymysql://<database-name>:<database-password>@localhost/<database-name>
+```
 
 2. Create virtual environment
 ```bash
