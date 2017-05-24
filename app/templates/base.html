@@ -15,7 +15,7 @@
 <nav class="navbar navbar-default">
     <div class="container-fluid">
         <a class="navbar-brand" href="/">{{ current_user.username }}</a>
-        <a href="#" class="navbar-left"><img src="/static/images/SU_Logo.png"></a>
+        <a href="#" class="navbar-right"><img width="42px" src="./static/images/SU_Logo.png"></a>
 
         <ul class="nav navbar-nav">
             <li class="active"><a href="/">Home</a></li>
@@ -28,5 +28,14 @@
 </nav>
 
 {% block content %}{% endblock %}
+
+<div class="col-md-12">
+    <footer class="footer">
+        <div class="container">
+            <p class="text-muted">Chavdar Dutsov, Sofia University "St. Kliment Ohridski", 2017</p>
+        </div>
+    </footer>
+</div>
+
 {% block scripts %} {% endblock %}
 </html>
