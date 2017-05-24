@@ -15,6 +15,8 @@
 <nav class="navbar navbar-default">
     <div class="container-fluid">
         <a class="navbar-brand" href="/">{{ current_user.username }}</a>
+        <a href="#" class="navbar-left"><img src="/static/images/SU_Logo.png"></a>
+
         <ul class="nav navbar-nav">
             <li class="active"><a href="/">Home</a></li>
             {% if current_user.is_authenticated %}
