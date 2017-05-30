@@ -50,15 +50,6 @@ def import_files(user_folder, series_name, files):
             if file.filename.split('.')[-1] == 'tdc':
                 filename = secure_filename(file.filename)
                 file.save(os.path.join(par_dir, udir, filename))
-                try:
-                    meas = tdc_to_dbmeas(file=open(os.path.join(par_dir, udir, filename)),
-                                         series_name=series_name,
-                                         serial_number=serial_number,
-                                         bulk_tag="")
-                    all_meas.append(meas)
-                    continue
-                except:
-                    print(".tdc file ", filename, ' is corrupted')
                 meas = tdc_to_dbmeas_ver34(file=open(os.path.join(par_dir, udir, filename)),
                                            series_name=series_name,
                                            serial_number=serial_number)
@@ -183,16 +174,9 @@ def tdc_to_dbmeas_ver34(file, series_name, serial_number):
     run_number = 0
 
     for line in lines[start_line_number:]:
-        run = line.rsplit(':')
+        run = line.split(':', 1)
         if len(run) == 2:
-            if 'START TIME' in run[0]:
-                time = run[1].rsplit(',', 1)
-                stop_timer_name = time[0]
-                start_time = datetime.strptime(time[1], '%d/%b/%y ,%H:%M:%S.%f\r\n')
-            line = run[1].rsplit(',')
-            key, value = line[0], line[1]
-
-            if 'Real Time [s]' in key:
+            if 'START TIME' in run[1]:
                 run_number = int(''.join(i for i in re.findall(r'\d+', run[0])))
                 if run_number > 1:
                     measurements.append({"path": file.name,
@@ -202,7 +186,8 @@ def tdc_to_dbmeas_ver34(file, series_name, serial_number):
                                          "filename": os.path.basename(file.name),
                                          "datetime": start_time,
                                          "stop_timer_name": stop_timer_name,
-                                         "run_number": str(run_number - 1) + '/' + str(number_of_runs),
+                                         "run_number": str(run_number - 1),
+                                         "total_runs": str(number_of_runs),
                                          "radionuclide": radionuclide,
                                          "cocktail": cocktail,
                                          "sample_name": sample_name,
@@ -222,8 +207,13 @@ def tdc_to_dbmeas_ver34(file, series_name, serial_number):
                                          "counters_bundle": pickle.dumps(counters_bundle),
                                          "timers_bundle": pickle.dumps(timers_bundle)
                                          })
-                preset_time = int(re.findall(r'\d+', value)[0])
-                start_time += timedelta(seconds=preset_time)
+                time_row = run[1].split(':', 1)
+                time = time_row[1].split(',', 1)
+                stop_timer_name = time[0].strip()
+                start_time = datetime.strptime(time[1].strip(), '%d/%m/%Y  %H:%M:%S.%f')
+            else:
+                line = run[1].rsplit(',')
+                key, value = line[0], line[1]
 
             if "[cps]" in key:
                 cps_bundle.update({key: float(value)})
@@ -238,7 +228,8 @@ def tdc_to_dbmeas_ver34(file, series_name, serial_number):
                          "filename": os.path.basename(file.name),
                          "datetime": start_time,
                          "stop_timer_name": stop_timer_name,
-                         "run_number": str(run_number) + '/' + str(number_of_runs),
+                         "run_number": str(run_number),
+                         "total_runs": str(number_of_runs),
                          "radionuclide": radionuclide,
                          "cocktail": cocktail,
                          "sample_name": sample_name,

@@ -21,6 +21,7 @@ class Measurement(db.Model):
     preset_time = db.Column(db.Integer)
     stop_timer_name = db.Column(db.String(20))
     run_number = db.Column(db.String(15))
+    total_runs = db.Column(db.String(10))
 
     threshold_a = db.Column(db.Float)
     threshold_b = db.Column(db.Float)
