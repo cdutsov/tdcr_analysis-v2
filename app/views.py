@@ -173,6 +173,7 @@ def export():
     for result in results:
         d = OrderedDict(
             [('File name', result.filename),
+             ('Run number', result.run_number),
              ('Start time', result.datetime),
              ('Real time', result.preset_time),
              ('Series name', result.series_name),
