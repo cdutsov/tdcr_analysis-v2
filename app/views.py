@@ -17,6 +17,7 @@ from .db_management import extract_bundle, add_columns, write_csv, import_files,
 from .forms import UploadForm, ExportForm, LoginForm
 from .models import Measurement, Cocktail, User
 from collections import OrderedDict
+from .config import basedir
 
 ALLOWED_EXTENSIONS = {'tdc'}
 
@@ -128,21 +129,6 @@ def session():
         try:
             d = OrderedDict(
                 [('File name', result["filename"]),
-                 ('Start time', result["datetime"]),
-                 # ('Real time', extract_bundle(result["timers_bundle"], fields=["Real_Time"])["Real Time"]),
-                 ('Series name', result["series_name"]),
-                 ('Radionuclide', result["radionuclide"]),
-                 ('LS cocktail', result["cocktail"]),
-                 ('Coincidence window N', result["coinc_window_n"]),
-                 ('Coincidence window M', result["coinc_window_m"]),
-                 ('EXT DT 1', result["ext_dt1"]),
-                 ('EXT DT 2', result["ext_dt2"])])
-        except:
-            print("Old file format error!")
-
-        try:
-            d = OrderedDict(
-                [('File name', result["filename"]),
                  ('Run number', result["run_number"]),
                  ('Start time', result["datetime"]),
                  ('Real time', result["preset_time"]),
@@ -153,7 +139,7 @@ def session():
                  ('Coincidence window M', result["coinc_window_m"]),
                  ('EXT DT 1', result["ext_dt1"]),
                  ('EXT DT 2', result["ext_dt2"])])
-        finally:
+        except ValueError:
             print('New file format error!')
 
         d.update(extract_bundle(result["cps_bundle"], fields=['N1', 'N2', 'M1', 'M2']))
@@ -261,3 +247,9 @@ def form_data():
                    ext_dt1_vals=ext_dt1_vals,
                    ext_dt2_vals=ext_dt2_vals,
                    number_results=number_results)
+
+
+@app.route('/about')
+def about():
+    date_modified = datetime.fromtimestamp(os.path.getmtime(basedir + "/db_management.py")).strftime('%d %B %Y')
+    return render_template('about.html', modified=date_modified)
