@@ -2,7 +2,7 @@ import os
 import pickle
 import re
 from datetime import datetime
-
+from subprocess import call, check_output
 
 from flask_login import login_required
 from flask_login import login_user
@@ -253,4 +253,11 @@ def form_data():
 @app.route('/about')
 def about():
     date_modified = datetime.fromtimestamp(os.path.getmtime(basedir + "/db_management.py")).strftime('%d %B %Y')
-    return render_template('about.html', modified=date_modified)
+    uptime = check_output(['uptime', '-p']).decode('utf-8')
+    try:
+        for line in check_output(['service', 'apache2', 'status']).decode('utf-8').split('\n'):
+            if 'Active' in line:
+                apache_uptime = line.split(';')[1]
+    except FileNotFoundError:
+        apache_uptime = 'Service not started'
+    return render_template('about.html', modified=date_modified, uptime=uptime, apache_uptime=apache_uptime)
