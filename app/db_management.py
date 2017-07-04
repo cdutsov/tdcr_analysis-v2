@@ -144,12 +144,12 @@ def tdc_to_dbmeas_ver34(file, series_name, serial_number):
 
     # add hardware data
     for line in lines[1:3]:
-        key, value = line.rsplit(',', 1)
+        key, value = line.split(',', 1)
         hardware_bundle.update({key: value})
 
     settings = OrderedDict()
-    for line in lines[6:21]:
-        key, value = [x.strip() for x in line.rsplit(',', 1) if x]
+    for line in lines[5:21]:
+        key, value = [x.strip() for x in line.split(',', 1) if x]
         settings.update({key: value})
 
     threshold_a = float(settings['Threshold A [mV]'])
