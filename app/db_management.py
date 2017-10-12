@@ -155,7 +155,7 @@ def tdc_to_dbmeas_ver34(file, series_name, serial_number):
     threshold_a = float(settings['Threshold A [mV]'])
     threshold_b = float(settings['Threshold B [mV]'])
     threshold_c = float(settings['Threshold C [mV]'])
-    high_voltage = int(''.join(x for x in str(settings['High Voltage']) if x.isdigit()))
+    high_voltage = int(''.join(x for x in str(settings['High Voltage']) if x.isdigit()) or 0)
     coinc_window_n = int(settings['Coincidence Window N [ns]'])
     coinc_window_m = int(settings['Coincidence Window M [ns]'])
     ext_dt1 = float(settings['Dead Time Extension 1 [us]'])
