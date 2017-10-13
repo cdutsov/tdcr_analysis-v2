@@ -8,6 +8,11 @@
     <script src="http://code.jquery.com/jquery-latest.js"></script>
     <script src="/static/js/bootstrap.js"></script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+    <link rel="stylesheet" href="/resources/demos/style.css">
+    <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+
 
 </head>
 
@@ -21,6 +26,7 @@
             <li class="active"><a href="/">Home</a></li>
             {% if current_user.is_authenticated %}
                 <li><a href="/admin/measurement">Database</a></li>
+                <li><a href="/change_db">Modify</a></li>
                 <li><a href="/logout">Log out</a></li>
                 <li><a href="/about">About</a></li>
             {% endif %}
@@ -41,5 +47,10 @@
     </footer>
 </div>
 
-{% block scripts %} {% endblock %}
+{% block scripts %}
+    <script>
+        $SCRIPT_ROOT =
+        {{ request.script_root|tojson|safe }}
+    </script>
+{% endblock %}
 </html>

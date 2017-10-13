@@ -13,15 +13,14 @@ from app import app, db, login_manager
 from flask import g
 from flask import make_response, jsonify
 from flask import render_template, request, redirect, url_for
-from .db_management import extract_bundle, add_columns, write_csv, import_files, get_or_create, check_warnings
-from .forms import UploadForm, ExportForm, LoginForm
+from .db_management import extract_bundle, add_columns, write_csv, import_files, get_or_create, check_warnings, \
+    delete_series
+from .forms import UploadForm, ExportForm, LoginForm, DeleteForm
 from .models import Measurement, Cocktail, User
 from collections import OrderedDict
 from .config import basedir
 
 ALLOWED_EXTENSIONS = {'tdc'}
-
-
 
 
 def allowed_file(filename):
@@ -261,3 +260,16 @@ def about():
     except FileNotFoundError:
         apache_uptime = 'Service not started'
     return render_template('about.html', modified=date_modified, uptime=uptime, apache_uptime=apache_uptime)
+
+
+@app.route('/change_db', methods=['GET', 'POST'])
+def change():
+    delete_form = DeleteForm.new(user=current_user.username)
+    return render_template('change.html', delete_form=delete_form)
+
+
+@app.route('/_delete_series')
+def delete():
+    series_name = request.args.get('series_name', '', type=str)
+    delete_series(user=current_user, series_name=series_name)
+    return jsonify('kur')

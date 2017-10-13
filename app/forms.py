@@ -60,3 +60,15 @@ class ExportForm(FlaskForm):
         form.series_choices = [str(value[0]) for value in db.session.query(Measurement.series_name).join(User).filter(
             User.username == user).distinct()]
         return form
+
+
+class DeleteForm(FlaskForm):
+    series_name = StringField('series_name', id='series_name')
+
+    @classmethod
+    def new(cls, user):
+        form = cls()
+        form.series_choices = [str(value[0]) for value in db.session.query(Measurement.series_name).join(User).filter(
+            User.username == user).distinct()]
+
+        return form

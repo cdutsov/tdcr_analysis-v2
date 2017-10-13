@@ -296,3 +296,17 @@ def check_warnings(user, d):
     if not new_radionuclide in radionuclides:
         warnings.update({'radionuclide': new_radionuclide})
     return warnings
+
+
+def delete_series(user, series_name):
+    measurements = db.session.query(Measurement).join(User).filter(User.username == user.username,
+                                                                   Measurement.series_name == series_name)
+    for measurement in measurements:
+        print(measurement)
+        db.session.delete(measurement)
+        db.session.commit()
+    return None
+
+
+def change_field(series_name, field):
+    pass
