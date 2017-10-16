@@ -73,7 +73,7 @@ class CocktailView(ModelView):
         return self._use_filtered_parent(super(CocktailView, self).edit_form(obj))
 
     def _use_filtered_parent(self, form):
-        form.uploader.query_factory = self._get_parent_list
+        form.cocktail_uploader.query_factory = self._get_parent_list
         return form
 
     def _get_parent_list(self):
