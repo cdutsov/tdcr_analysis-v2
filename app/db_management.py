@@ -50,7 +50,7 @@ def import_files(user_folder, series_name, files):
             if file.filename.split('.')[-1] == 'tdc':
                 filename = secure_filename(file.filename)
                 file.save(os.path.join(par_dir, udir, filename))
-                meas = tdc_to_dbmeas_ver34(file=open(os.path.join(par_dir, udir, filename)),
+                meas = tdc_to_dbmeas_ver34(file=open(os.path.join(par_dir, udir, filename), errors='replace'),
                                            series_name=series_name,
                                            serial_number=serial_number)
                 all_meas.extend(meas)

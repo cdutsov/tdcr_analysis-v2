@@ -98,7 +98,7 @@ def commit():
         for meas in all_meas:
             uploader = get_or_create(db.session, User, username=meas["uploader"])
             cocktail_instance = get_or_create(db.session, Cocktail,
-                                              cocktail_name=re.sub('[^A-Za-z0-9]+', '', meas["cocktail"]),
+                                              cocktail_name=re.sub('[^A-Za-z0-9 ]+', '', meas["cocktail"]),
                                               cocktail_uploader=uploader)
             meas['cocktail'] = cocktail_instance
             meas['uploader'] = uploader
@@ -237,7 +237,7 @@ def form_data():
     if not ext_dt2:
         ext_dt2_vals = sorted(set([result.ext_dt2 for result in results]))
     if not series_name:
-        series_name_vals = sorted(set([result.series_name for result in results]))
+        series_name_vals = sorted(set([result.series_name for result in results]), reverse=True)
     if not radionuclide:
         radionuclide_vals = sorted(set([result.radionuclide for result in results]))
     return jsonify(coinc_window_n_vals=coinc_window_n_vals,
