@@ -84,7 +84,7 @@
                     <label class="col-sm-5 control-label" for="series_name"> Series name</label>
                     <div class="col-sm-7">
                         {{ export_form.series_name(id="series_name",
-                        placeholder="Series name", list="series_name_vals", class_="form-control col-sm-7") }}
+                        placeholder="Series name", list="series_name_vals", class_="form-control col-sm-7", autocomplete="off") }}
                         <datalist id="series_name_vals">
                             {% for choice in export_form.series_choices %}
                                 <option value="{{ choice }}">

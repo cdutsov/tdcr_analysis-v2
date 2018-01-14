@@ -168,7 +168,7 @@ def export():
              Measurement.ext_dt2 == ext_dt2 if ext_dt2 and not ext_dt2 == '0' else True
              )).filter(User.username == g.user.username).all()
     l = []
-    print(results)
+
     for result in results:
         d = OrderedDict(
             [('File name', result.filename),
@@ -182,7 +182,7 @@ def export():
              ('Coincidence window M' if not coinc_window_m == '0' else False, result.coinc_window_m),
              ('EXT DT 1' if not ext_dt1 == '0' else False, result.ext_dt1),
              ('EXT DT 2' if not ext_dt2 == '0' else False, result.ext_dt2)])
-        fields = ['RAW' if show_raw_cps else '',
+        fields = ['Raw' if show_raw_cps else '',
                   ('N1' if not coinc_window_n == '0' else '') if not ext_dt1 == '0' else '',
                   ('N2' if not coinc_window_n == '0' else '') if not ext_dt2 == '0' else '',
                   ('M1' if not coinc_window_m == '0' else '') if not ext_dt1 == '0' else '',
