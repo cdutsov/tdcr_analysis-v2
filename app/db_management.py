@@ -160,7 +160,7 @@ def tdc_to_dbmeas_ver34(file, series_name, serial_number):
     coinc_window_m = int(settings['Coincidence Window M [ns]'])
     ext_dt1 = float(settings['Dead Time Extension 1 [us]'])
     ext_dt2 = float(settings['Dead Time Extension 2 [us]'])
-    preset_time = int(settings['Preset Time per Run [s]'])
+    preset_time = int(float(settings['Preset Time per Run [s]']))
     cocktail = settings['LS Coctail']
     radionuclide = settings['Nuclides']
     operator = settings['Operator']
